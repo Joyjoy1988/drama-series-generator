@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const SERIES_SYSTEM = `You are a TikTok short drama series writer and AI video prompt expert specializing in acting direction.
 
@@ -57,14 +57,15 @@ const callAPI = async (system, messages, maxTokens=2000) => {
 };
 
 export default function App() {
-  const [tool, setTool] = useState("flow");
-  const [concept, setConcept] = useState("");
+  const [tool, setTool] = useState(() => localStorage.getItem("dsg_tool") || "flow");
+  const [concept, setConcept] = useState(() => localStorage.getItem("dsg_concept") || "");
   const [loading, setLoading] = useState(false);
-  const [series, setSeries] = useState(null);
+  const [series, setSeries] = useState(() => { try { const s = localStorage.getItem("dsg_series"); return s ? JSON.parse(s) : null; } catch(e) { return null; } });
   const [activeEp, setActiveEp] = useState(0);
   const [activeTab, setActiveTab] = useState("prompt");
   const [copied, setCopied] = useState(null);
   const [error, setError] = useState("");
+  const [gdLoading, setGdLoading] = useState(false);
 
   // Character refs
   const [charImages, setCharImages] = useState({});
@@ -75,6 +76,37 @@ export default function App() {
   const [activeChar, setActiveChar] = useState(null);
   const [activeView, setActiveView] = useState("front_prompt");
   const fileRefs = useRef({});
+
+  // Auto-save to localStorage whenever series/concept/tool changes
+  useEffect(() => { if (series) localStorage.setItem("dsg_series", JSON.stringify(series)); }, [series]);
+  useEffect(() => { localStorage.setItem("dsg_concept", concept); }, [concept]);
+  useEffect(() => { localStorage.setItem("dsg_tool", tool); }, [tool]);
+
+  const exportToGoogleDrive = async () => {
+    if (!series) return;
+    setGdLoading(true);
+    try {
+      let content = `DRAMA SERIES: ${series.title}\nGENRE: ${series.genre}\nHOOK: ${series.hook}\nTOOL: ${tool.toUpperCase()}\n\n`;
+      content += `CHARACTERS:\n`;
+      series.characters?.forEach(c => { content += `- ${c.name} (${c.role}): ${c.arc}\n`; });
+      content += `\n${"=".repeat(50)}\n\n`;
+      series.episodes?.forEach(ep => {
+        content += `EPISODE ${ep.episode}: ${ep.title}\n`;
+        content += `N4 Score: ${ep.n4?.score}/10 (${ep.n4?.rating})\n`;
+        content += `\nVIDEO PROMPT:\n${ep.prompt}\n`;
+        content += `\nSUBTEXT: ${ep.subtext}\n`;
+        content += `CLIFFHANGER: ${ep.cliffhanger}\n`;
+        content += `\n${"-".repeat(40)}\n\n`;
+      });
+      const blob = new Blob([content], {type:"text/plain"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `${series.title} - Drama Series.txt`;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch(e) { console.error(e); }
+    setGdLoading(false);
+  };
 
   const generate = async () => {
     if (!concept.trim()) return;
@@ -429,8 +461,12 @@ export default function App() {
             </div>
           )}
 
-          <div style={{textAlign:"center",marginTop:14}}>
-            <button onClick={()=>{setSeries(null);setConcept("");setCharImages({});setFaceSheets({});setLooksData({});}}
+          <div style={{textAlign:"center",marginTop:14,display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <button onClick={exportToGoogleDrive} disabled={gdLoading}
+              style={{padding:"8px 20px",background:"rgba(0,200,100,0.1)",border:"1px solid rgba(0,200,100,0.25)",borderRadius:8,color:"#00c864",cursor:"pointer",fontSize:12,fontFamily:"Georgia,serif"}}>
+              {gdLoading?"Exporting…":"⬇ Download / Export"}
+            </button>
+            <button onClick={()=>{setSeries(null);setConcept("");setCharImages({});setFaceSheets({});setLooksData({});localStorage.removeItem("dsg_series");localStorage.removeItem("dsg_concept");}}
               style={{padding:"8px 20px",background:"transparent",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,color:"#606080",cursor:"pointer",fontSize:12,fontFamily:"Georgia,serif"}}>
               ↺ New Series
             </button>
