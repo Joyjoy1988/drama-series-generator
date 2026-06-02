@@ -126,7 +126,7 @@ export default function DramaGenerator() {
     if (!concept.trim()) return;
     setLoading(true); setError(""); setSeries(null);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/generate", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({
@@ -161,7 +161,7 @@ export default function DramaGenerator() {
     setRefLoading(prev => ({ ...prev, [charName]:true }));
     try {
       const char = series?.characters?.find(c=>c.name===charName);
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/generate", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({
