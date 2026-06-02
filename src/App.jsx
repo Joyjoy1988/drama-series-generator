@@ -140,11 +140,12 @@ export default function DramaGenerator() {
       const data = await res.json();
       console.log("[generate] Response data:", JSON.stringify(data).slice(0, 300));
       if (!res.ok) {
-        console.error("[generate] API error:", data);
-        throw new Error(`API error ${res.status}: ${data.error || JSON.stringify(data)}`);
+        console.error("[generate] API error:", JSON.stringify(data));
+        const msg = data?.error?.message || data?.error || JSON.stringify(data);
+        throw new Error(`API ${res.status}: ${msg}`);
       }
       const text = data.content?.find(b=>b.type==="text")?.text || "";
-      if (!text) { console.error("[generate] No text in response:", data); throw new Error("Empty response from API"); }
+      if (!text) { console.error("[generate] No text in response:", JSON.stringify(data)); throw new Error("Empty response — no text block returned"); }
       const parsed = JSON.parse(text.replace(/```json|```/g,"").trim());
       setSeries(parsed);
       setActiveEp(0);
@@ -187,9 +188,13 @@ export default function DramaGenerator() {
       console.log("[refsheet] HTTP status:", res.status);
       const data = await res.json();
       console.log("[refsheet] Response data:", JSON.stringify(data).slice(0, 300));
-      if (!res.ok) { console.error("[refsheet] API error:", data); throw new Error(`API error ${res.status}`); }
+      if (!res.ok) {
+        console.error("[refsheet] API error:", JSON.stringify(data));
+        const msg = data?.error?.message || data?.error || JSON.stringify(data);
+        throw new Error(`API ${res.status}: ${msg}`);
+      }
       const text = data.content?.find(b=>b.type==="text")?.text||"";
-      if (!text) throw new Error("Empty response from API");
+      if (!text) throw new Error("Empty response — no text block returned");
       const parsed = JSON.parse(text.replace(/```json|```/g,"").trim());
       setRefSheets(prev => ({ ...prev, [charName]:parsed }));
     } catch(e) { console.error("[refsheet] Caught error:", e.message, e); }
@@ -285,7 +290,12 @@ export default function DramaGenerator() {
             style={{ marginTop:16, width:"100%", padding:"15px", background:loading?"rgba(255,77,109,0.3)":"linear-gradient(135deg,#FF4D6D,#C084FC)", border:"none", borderRadius:10, color:"#fff", fontSize:14, fontFamily:"'Georgia',serif", letterSpacing:2, cursor:loading?"not-allowed":"pointer", fontWeight:600 }}>
             {loading ? `✦ Generating for ${currentTool?.label}…` : `✦ Generate Drama Series for ${currentTool?.label}`}
           </button>
-          {error && <p style={{ color:"#F87171", marginTop:10, fontSize:12, textAlign:"center" }}>{error}</p>}
+          {error && (
+            <div style={{ marginTop:12, padding:"12px 14px", background:"rgba(248,113,113,0.08)", border:"1px solid rgba(248,113,113,0.35)", borderRadius:8 }}>
+              <div style={{ fontSize:10, letterSpacing:3, color:"#F87171", textTransform:"uppercase", marginBottom:6 }}>Error</div>
+              <pre style={{ margin:0, color:"#F87171", fontSize:12, lineHeight:1.6, whiteSpace:"pre-wrap", wordBreak:"break-all", fontFamily:"monospace", maxHeight:160, overflowY:"auto" }}>{error}</pre>
+            </div>
+          )}
         </div>
 
         {/* RESULTS */}
