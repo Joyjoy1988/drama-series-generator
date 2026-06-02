@@ -1,0 +1,131 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dims {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+@media (max-width: 580px) {
+  .dims { grid-template-columns: 1fr; }
+}
+
+.dim {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dimHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.dimVal {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+  font-size: 0.8rem;
+}
+
+.dimDesc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.star {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--color-border);
+  padding: 0 0.05rem;
+  line-height: 1;
+  transition: color 0.1s, transform 0.1s;
+}
+
+.star:hover { transform: scale(1.15); }
+.starOn { color: var(--color-primary); }
+
+.hint {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-left: 0.3rem;
+  font-style: italic;
+}
+
+/* Total */
+.total {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.totalLeft {
+  display: flex;
+  flex-direction: column;
+  min-width: 60px;
+}
+
+.totalLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+.totalVal {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+.totalMax {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.bar {
+  flex: 1;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.tier {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
