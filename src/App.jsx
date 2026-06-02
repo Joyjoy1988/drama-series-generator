@@ -131,7 +131,7 @@ export default function DramaGenerator() {
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({
           model:"claude-sonnet-4-6",
-          max_tokens:6000,
+          max_tokens:3000,
           system: SERIES_PROMPT(tool),
           messages:[{ role:"user", content:`Story concept: ${concept}` }]
         })
