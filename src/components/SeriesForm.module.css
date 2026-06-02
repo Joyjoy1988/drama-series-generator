@@ -30,6 +30,15 @@
   gap: 0.35rem;
 }
 
+.linked {
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  margin-left: 0.3rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .field label {
   font-size: 0.8rem;
   font-weight: 500;

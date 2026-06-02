@@ -5,7 +5,9 @@ import styles from './SeriesForm.module.css'
 const GENRES = ['Romance', 'Revenge', 'Betrayal', 'Forbidden Love', 'Rags to Riches', 'Thriller']
 const SETTINGS = ['Modern City', 'Corporate Office', 'High School', 'Royal Palace', 'Small Town', 'Hospital']
 
-export default function SeriesForm({ onGenerate }) {
+export default function SeriesForm({ onGenerate, characters = [] }) {
+  const protagonist = characters.find(c => c.role === 'Protagonist')?.name || ''
+  const antagonist = characters.find(c => c.role === 'Antagonist')?.name || ''
   const [form, setForm] = useState({
     title: '',
     genre: 'Romance',
@@ -26,7 +28,12 @@ export default function SeriesForm({ onGenerate }) {
     e.preventDefault()
     setLoading(true)
     setTimeout(() => {
-      const result = generateEpisodes(form)
+      const merged = {
+        ...form,
+        protagonistName: form.protagonistName || protagonist,
+        antagonistName: form.antagonistName || antagonist,
+      }
+      const result = generateEpisodes(merged)
       onGenerate(result)
       setLoading(false)
     }, 800)
@@ -49,22 +56,22 @@ export default function SeriesForm({ onGenerate }) {
         </div>
 
         <div className={styles.field}>
-          <label>Protagonist Name</label>
+          <label>Protagonist Name {protagonist && <span className={styles.linked}>↗ {protagonist}</span>}</label>
           <input
             name="protagonistName"
             value={form.protagonistName}
             onChange={handleChange}
-            placeholder="Mia Chen"
+            placeholder={protagonist || 'Mia Chen'}
           />
         </div>
 
         <div className={styles.field}>
-          <label>Antagonist Name</label>
+          <label>Antagonist Name {antagonist && <span className={styles.linked}>↗ {antagonist}</span>}</label>
           <input
             name="antagonistName"
             value={form.antagonistName}
             onChange={handleChange}
-            placeholder="Lucas Zhao"
+            placeholder={antagonist || 'Lucas Zhao'}
           />
         </div>
 
