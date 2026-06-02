@@ -2,7 +2,12 @@
 
 const https = require("https");
 
-// Lightweight HTTPS POST — no external deps, works on any Node version Vercel supports
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 function anthropicRequest(apiKey, body) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify(body);
@@ -37,6 +42,14 @@ function anthropicRequest(apiKey, body) {
 }
 
 module.exports = async function handler(req, res) {
+  // Set CORS headers on every response
+  Object.entries(CORS_HEADERS).forEach(([k, v]) => res.setHeader(k, v));
+
+  // Handle preflight
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
   try {
     console.log("[generate] invoked — method:", req.method);
 
@@ -68,7 +81,7 @@ module.exports = async function handler(req, res) {
     console.log("[generate] Anthropic status:", result.status);
 
     if (result.status !== 200) {
-      console.error("[generate] Anthropic error:", JSON.stringify(result.body));
+      console.error("[generate] Anthropic error body:", JSON.stringify(result.body));
     } else {
       console.log("[generate] stop_reason:", result.body.stop_reason);
     }

@@ -136,14 +136,24 @@ export default function DramaGenerator() {
           messages:[{ role:"user", content:`Story concept: ${concept}` }]
         })
       });
+      console.log("[generate] HTTP status:", res.status);
       const data = await res.json();
+      console.log("[generate] Response data:", JSON.stringify(data).slice(0, 300));
+      if (!res.ok) {
+        console.error("[generate] API error:", data);
+        throw new Error(`API error ${res.status}: ${data.error || JSON.stringify(data)}`);
+      }
       const text = data.content?.find(b=>b.type==="text")?.text || "";
+      if (!text) { console.error("[generate] No text in response:", data); throw new Error("Empty response from API"); }
       const parsed = JSON.parse(text.replace(/```json|```/g,"").trim());
       setSeries(parsed);
       setActiveEp(0);
       setActiveTab("prompt");
       if (parsed.characters?.length) setActiveCharRef(parsed.characters[0].name);
-    } catch(e) { setError("Generation failed — try again!"); }
+    } catch(e) {
+      console.error("[generate] Caught error:", e.message, e);
+      setError(`Generation failed: ${e.message}`);
+    }
     setLoading(false);
   };
 
@@ -174,11 +184,15 @@ export default function DramaGenerator() {
           ]}]
         })
       });
+      console.log("[refsheet] HTTP status:", res.status);
       const data = await res.json();
+      console.log("[refsheet] Response data:", JSON.stringify(data).slice(0, 300));
+      if (!res.ok) { console.error("[refsheet] API error:", data); throw new Error(`API error ${res.status}`); }
       const text = data.content?.find(b=>b.type==="text")?.text||"";
+      if (!text) throw new Error("Empty response from API");
       const parsed = JSON.parse(text.replace(/```json|```/g,"").trim());
       setRefSheets(prev => ({ ...prev, [charName]:parsed }));
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error("[refsheet] Caught error:", e.message, e); }
     setRefLoading(prev => ({ ...prev, [charName]:false }));
   };
 
